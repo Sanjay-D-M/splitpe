@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SplitPe — Settle without the awkward</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0d0d0d;
+    --paper: #f5f0e8;
+    --accent: #e8420a;
+    --muted: #6b6560;
+    --card: #fff8ef;
+    --green: #1a7a4a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* grain overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 999;
+    opacity: 0.4;
+  }
+
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.4rem 5vw;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    position: sticky; top: 0; background: var(--paper);
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.5rem; letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--accent); }
+
+  .nav-cta {
+    background: var(--ink);
+    color: var(--paper);
+    border: none; cursor: pointer;
+    padding: 0.55rem 1.3rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem; font-weight: 500;
+    letter-spacing: 0.3px;
+    transition: background 0.2s;
+  }
+  .nav-cta:hover { background: var(--accent); }
+
+  /* HERO */
+  .hero {
+    min-height: 90vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    padding: 0 5vw;
+    align-items: center;
+  }
+
+  .hero-left { padding-right: 4vw; padding-top: 3rem; }
+
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-size: 0.75rem; font-weight: 600;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+  }
+  .eyebrow::before {
+    content: ''; display: block;
+    width: 24px; height: 1px; background: var(--accent);
+  }
+
+  h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(2.8rem, 5vw, 4.2rem);
+    line-height: 1.08;
+    letter-spacing: -1.5px;
+    margin-bottom: 1.5rem;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero-sub {
+    font-size: 1.05rem;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 440px;
+    margin-bottom: 2.5rem;
+  }
+
+  .cta-row {
+    display: flex; align-items: center; gap: 1.2rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+    border: none; cursor: pointer;
+    padding: 0.9rem 2rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem; font-weight: 600;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 4px 4px 0 var(--ink);
+  }
+  .btn-primary:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--ink);
+  }
+  .btn-primary:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink);
+    border: 1.5px solid var(--ink);
+    cursor: pointer;
+    padding: 0.9rem 2rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem; font-weight: 500;
+    transition: background 0.2s, color 0.2s;
+  }
+  .btn-ghost:hover { background: var(--ink); color: var(--paper); }
+
+  .social-proof {
+    margin-top: 2.5rem;
+    display: flex; align-items: center; gap: 1rem;
+    font-size: 0.82rem; color: var(--muted);
+  }
+  .avatars {
+    display: flex;
+  }
+  .avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: 2px solid var(--paper);
+    margin-left: -8px;
+    background: var(--ink);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65rem; color: white; font-weight: 600;
+  }
+  .avatar:first-child { margin-left: 0; }
+  .avatar:nth-child(2) { background: #b34a0d; }
+  .avatar:nth-child(3) { background: #1a7a4a; }
+  .avatar:nth-child(4) { background: #4a3db3; }
+
+  /* MOCK PHONE */
+  .hero-right {
+    display: flex; justify-content: center; align-items: center;
+    padding: 2rem 0;
+  }
+
+  .phone-frame {
+    width: 280px;
+    background: var(--ink);
+    border-radius: 36px;
+    padding: 12px;
+    box-shadow: 24px 32px 60px rgba(0,0,0,0.25);
+    position: relative;
+    animation: float 4s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotate(-1deg); }
+    50% { transform: translateY(-12px) rotate(-1deg); }
+  }
+
+  .phone-screen {
+    background: #f5f5f5;
+    border-radius: 26px;
+    overflow: hidden;
+    min-height: 520px;
+  }
+
+  .phone-status {
+    background: #128C7E;
+    color: white;
+    padding: 10px 14px 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .phone-status .wa-icon {
+    width: 28px; height: 28px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+  }
+  .phone-status-text { font-size: 0.8rem; font-weight: 600; color: white; }
+  .phone-status-sub { font-size: 0.65rem; color: rgba(255,255,255,0.7); }
+
+  .chat-area {
+    padding: 10px 10px;
+    background: #e5ddd5;
+    min-height: 420px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+
+  .chat-bubble {
+    max-width: 85%;
+    padding: 7px 10px;
+    border-radius: 8px;
+    font-size: 0.72rem;
+    line-height: 1.45;
+    position: relative;
+    animation: popIn 0.3s ease both;
+  }
+
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.85) translateY(8px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .bubble-in {
+    background: white;
+    align-self: flex-start;
+    border-top-left-radius: 2px;
+  }
+  .bubble-out {
+    background: #dcf8c6;
+    align-self: flex-end;
+    border-top-right-radius: 2px;
+  }
+
+  .bubble-time {
+    font-size: 0.58rem;
+    color: rgba(0,0,0,0.4);
+    text-align: right;
+    margin-top: 3px;
+  }
+
+  .split-card {
+    background: white;
+    border-radius: 10px;
+    padding: 10px 12px;
+    align-self: center;
+    width: 90%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    animation: popIn 0.4s ease 0.5s both;
+  }
+  .split-card-header {
+    font-size: 0.65rem; font-weight: 700;
+    color: #128C7E;
+    text-transform: uppercase; letter-spacing: 0.8px;
+    margin-bottom: 6px;
+  }
+  .split-row {
+    display: flex; justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.7rem;
+  }
+  .split-row:last-child { border: none; }
+  .split-name { color: #333; }
+  .split-amt { font-weight: 600; }
+  .split-amt.owe { color: #c0392b; }
+  .split-amt.get { color: #1a7a4a; }
+  .split-btn {
+    width: 100%; margin-top: 8px;
+    background: #128C7E;
+    color: white; border: none;
+    padding: 7px;
+    border-radius: 6px;
+    font-size: 0.7rem; font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: flex;
+    border-top: 1px solid rgba(0,0,0,0.08);
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+  }
+  .stat-item {
+    flex: 1;
+    padding: 2rem 5vw;
+    border-right: 1px solid rgba(0,0,0,0.08);
+  }
+  .stat-item:last-child { border: none; }
+  .stat-num {
+    font-family: 'Instrument Serif', serif;
+    font-size: 2.4rem;
+    color: var(--accent);
+    letter-spacing: -1px;
+  }
+  .stat-label { font-size: 0.8rem; color: var(--muted); margin-top: 0.2rem; }
+
+  /* HOW IT WORKS */
+  section { padding: 6rem 5vw; }
+
+  .section-label {
+    font-size: 0.72rem; font-weight: 600;
+    letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    letter-spacing: -1px;
+    line-height: 1.15;
+    max-width: 500px;
+    margin-bottom: 3.5rem;
+  }
+
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: rgba(0,0,0,0.08);
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .step {
+    background: var(--paper);
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.2s;
+  }
+  .step:hover { background: var(--card); }
+
+  .step-num {
+    font-family: 'Instrument Serif', serif;
+    font-size: 4rem;
+    color: rgba(0,0,0,0.06);
+    position: absolute; top: 1rem; right: 1.5rem;
+    line-height: 1;
+  }
+
+  .step-icon {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .step h3 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.3rem;
+    margin-bottom: 0.6rem;
+    letter-spacing: -0.3px;
+  }
+
+  .step p {
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
+  /* PROBLEM vs SOLUTION */
+  .vs-section {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 5rem 5vw;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4vw;
+    align-items: center;
+  }
+
+  .vs-label {
+    font-size: 0.72rem; font-weight: 600;
+    letter-spacing: 2.5px; text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+    margin-bottom: 1rem;
+  }
+
+  .vs-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+    line-height: 1.15;
+    letter-spacing: -0.8px;
+    margin-bottom: 2rem;
+  }
+
+  .pain-list, .gain-list {
+    list-style: none;
+    display: flex; flex-direction: column; gap: 1rem;
+  }
+
+  .pain-list li, .gain-list li {
+    display: flex; gap: 0.8rem; align-items: flex-start;
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+
+  .pain-list li::before {
+    content: '✕';
+    color: #e8420a;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .gain-list li::before {
+    content: '✓';
+    color: #4ade80;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .vs-divider {
+    width: 1px;
+    height: 100%;
+    background: rgba(255,255,255,0.08);
+    display: none;
+  }
+
+  /* GROWTH SECTION */
+  .growth-section { background: var(--card); }
+
+  .growth-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .growth-card {
+    background: var(--paper);
+    padding: 2rem;
+    border: 1px solid rgba(0,0,0,0.08);
+    position: relative;
+  }
+
+  .growth-tag {
+    display: inline-block;
+    font-size: 0.65rem; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    padding: 0.3rem 0.7rem;
+    margin-bottom: 1rem;
+  }
+  .tag-validate { background: #fef3c7; color: #92400e; }
+  .tag-build { background: #d1fae5; color: #065f46; }
+  .tag-grow { background: #dbeafe; color: #1e40af; }
+  .tag-monetize { background: #fce7f3; color: #9d174d; }
+
+  .growth-card h3 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.2rem;
+    margin-bottom: 0.7rem;
+    letter-spacing: -0.3px;
+  }
+
+  .growth-card p, .growth-card li {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
+  .growth-card ul {
+    list-style: none;
+    display: flex; flex-direction: column; gap: 0.4rem;
+    margin-top: 0.5rem;
+  }
+
+  .growth-card ul li::before {
+    content: '→ ';
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* MARKET SIZE */
+  .market-section {
+    padding: 6rem 5vw;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6vw;
+    align-items: center;
+  }
+
+  .market-numbers {
+    display: flex; flex-direction: column; gap: 1.5rem;
+  }
+
+  .market-row {
+    display: flex; align-items: center; gap: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(0,0,0,0.07);
+  }
+  .market-row:last-child { border: none; padding: 0; }
+
+  .market-fig {
+    font-family: 'Instrument Serif', serif;
+    font-size: 2rem;
+    color: var(--accent);
+    letter-spacing: -0.8px;
+    min-width: 90px;
+  }
+
+  .market-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
+  .market-desc strong { color: var(--ink); }
+
+  /* CTA SECTION */
+  .final-cta {
+    background: var(--accent);
+    color: white;
+    padding: 6rem 5vw;
+    text-align: center;
+  }
+
+  .final-cta h2 {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(2.2rem, 4vw, 3.5rem);
+    letter-spacing: -1.5px;
+    margin-bottom: 1rem;
+    line-height: 1.1;
+  }
+
+  .final-cta p {
+    font-size: 1rem;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 2.5rem;
+    max-width: 480px;
+    margin-left: auto; margin-right: auto;
+    line-height: 1.65;
+  }
+
+  .btn-white {
+    background: white;
+    color: var(--accent);
+    border: none; cursor: pointer;
+    padding: 1rem 2.5rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem; font-weight: 700;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn-white:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 rgba(0,0,0,0.2);
+  }
+
+  footer {
+    padding: 2rem 5vw;
+    display: flex; justify-content: space-between; align-items: center;
+    border-top: 1px solid rgba(0,0,0,0.08);
+    font-size: 0.8rem; color: var(--muted);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .hero { grid-template-columns: 1fr; min-height: auto; padding: 3rem 5vw; }
+    .hero-right { display: none; }
+    .steps-grid { grid-template-columns: 1fr; }
+    .vs-section, .market-section { grid-template-columns: 1fr; }
+    .growth-grid { grid-template-columns: 1fr; }
+    .stats-bar { flex-direction: column; }
+    .stat-item { border-right: none; border-bottom: 1px solid rgba(0,0,0,0.08); }
+    footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+  }
+
+  /* Entrance animations */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .fade-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Split<span>Pe</span></div>
+  <button class="nav-cta" onclick="document.querySelector('.final-cta').scrollIntoView({behavior:'smooth'})">Join Waitlist</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero" style="padding-top:2rem">
+  <div class="hero-left fade-up">
+    <div class="eyebrow">Built for Bangalore</div>
+    <h1>Settle up.<br>Without the<br><em>awkward.</em></h1>
+    <p class="hero-sub">Just type "@splitpe ₹480 dinner" in your WhatsApp group. Everyone gets their share instantly. No app, no login, no drama.</p>
+    <div class="cta-row">
+      <button class="btn-primary" onclick="document.querySelector('.final-cta').scrollIntoView({behavior:'smooth'})">Join the Waitlist</button>
+      <button class="btn-ghost" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">See how it works</button>
+    </div>
+    <div class="social-proof">
+      <div class="avatars">
+        <div class="avatar">RK</div>
+        <div class="avatar">SP</div>
+        <div class="avatar">AM</div>
+        <div class="avatar">+</div>
+      </div>
+      <span>47 Bangaloreans already on waitlist</span>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="phone-frame">
+      <div class="phone-screen">
+        <div class="phone-status">
+          <div class="wa-icon">💬</div>
+          <div>
+            <div class="phone-status-text">HSR Layout Gang</div>
+            <div class="phone-status-sub">Rahul, Sneha, Aditya, you</div>
+          </div>
+        </div>
+        <div class="chat-area">
+          <div class="chat-bubble bubble-in" style="animation-delay:0.1s">
+            Guys chai + dinner came to ₹1,240 today 😤
+            <div class="bubble-time">7:42 PM</div>
+          </div>
+          <div class="chat-bubble bubble-in" style="animation-delay:0.3s">
+            I paid, someone sort it out
+            <div class="bubble-time">7:42 PM</div>
+          </div>
+          <div class="chat-bubble bubble-out" style="animation-delay:0.6s">
+            @splitpe ₹1240 Rahul paid dinner HSR
+            <div class="bubble-time">7:43 PM</div>
+          </div>
+          <div class="split-card">
+            <div class="split-card-header">⚡ SplitPe — Settled</div>
+            <div class="split-row">
+              <span class="split-name">Rahul (paid)</span>
+              <span class="split-amt get">+₹930 to collect</span>
+            </div>
+            <div class="split-row">
+              <span class="split-name">Sneha</span>
+              <span class="split-amt owe">owes ₹310</span>
+            </div>
+            <div class="split-row">
+              <span class="split-name">Aditya</span>
+              <span class="split-amt owe">owes ₹310</span>
+            </div>
+            <div class="split-row">
+              <span class="split-name">You</span>
+              <span class="split-amt owe">owes ₹310</span>
+            </div>
+            <button class="split-btn">Pay Rahul via UPI ↗</button>
+          </div>
+          <div class="chat-bubble bubble-in" style="animation-delay:1.1s">
+            Oh wow that's clean 🔥
+            <div class="bubble-time">7:43 PM</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat-item fade-up">
+    <div class="stat-num">₹0</div>
+    <div class="stat-label">Cost to use (forever free tier)</div>
+  </div>
+  <div class="stat-item fade-up">
+    <div class="stat-num">8 sec</div>
+    <div class="stat-label">Time to split a bill</div>
+  </div>
+  <div class="stat-item fade-up">
+    <div class="stat-num">0</div>
+    <div class="stat-label">Apps to download</div>
+  </div>
+  <div class="stat-item fade-up">
+    <div class="stat-num">UPI</div>
+    <div class="stat-label">Native payment integration</div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <p class="section-label fade-up">How it works</p>
+  <h2 class="section-title fade-up">Three words in WhatsApp. Done.</h2>
+  <div class="steps-grid">
+    <div class="step fade-up">
+      <div class="step-num">01</div>
+      <div class="step-icon">💬</div>
+      <h3>Add to your group</h3>
+      <p>Add @SplitPe to any existing WhatsApp group. No one needs to sign up. No app install. It just works in the chat your group already uses.</p>
+    </div>
+    <div class="step fade-up">
+      <div class="step-num">02</div>
+      <div class="step-icon">⚡</div>
+      <h3>Type one command</h3>
+      <p>Whoever paid types: <strong>@splitpe ₹800 Rohan paid Zomato</strong>. That's it. SplitPe reads the message and calculates everyone's share automatically.</p>
+    </div>
+    <div class="step fade-up">
+      <div class="step-num">03</div>
+      <div class="step-icon">📲</div>
+      <h3>Pay directly via UPI</h3>
+      <p>A card appears in the chat with each person's amount and a one-tap UPI link. No chasing. No screenshots. Settled before anyone forgets.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM vs SOLUTION -->
+<div class="vs-section">
+  <div class="fade-up">
+    <p class="vs-label">The old way</p>
+    <h2 class="vs-title">Why Splitwise doesn't actually work here</h2>
+    <ul class="pain-list">
+      <li>Everyone needs to download a separate app</li>
+      <li>Someone has to manually enter every expense</li>
+      <li>"Remind" notifications feel passive aggressive</li>
+      <li>Settles in foreign currency (not built for UPI)</li>
+      <li>Dead after 3 days — group forgets to use it</li>
+    </ul>
+  </div>
+  <div class="fade-up">
+    <p class="vs-label">The SplitPe way</p>
+    <h2 class="vs-title">Lives inside the chat. Zero friction.</h2>
+    <ul class="gain-list">
+      <li>Zero downloads — it's a WhatsApp bot</li>
+      <li>One message = split done, automatically</li>
+      <li>Friendly reminders inside the same group chat</li>
+      <li>Native UPI deeplinks — pay in one tap</li>
+      <li>Group already uses WhatsApp — adoption is built in</li>
+    </ul>
+  </div>
+</div>
+
+<!-- MARKET POTENTIAL -->
+<div class="market-section" id="market">
+  <div class="fade-up">
+    <p class="section-label">Market potential</p>
+    <h2 class="section-title">The numbers that matter</h2>
+    <p style="color:var(--muted); font-size:0.9rem; line-height:1.7">Bangalore alone has 4M+ young urban adults splitting expenses daily — rent, food, cabs, travel. India's UPI processes 15B+ transactions/month. We sit right at this intersection.</p>
+  </div>
+  <div class="market-numbers fade-up">
+    <div class="market-row">
+      <div class="market-fig">4M+</div>
+      <div class="market-desc"><strong>Urban young adults in Bangalore</strong> splitting expenses with roommates, colleagues, or friends every single day.</div>
+    </div>
+    <div class="market-row">
+      <div class="market-fig">₹500Cr</div>
+      <div class="market-desc"><strong>Estimated annual value of informal IOUs</strong> — money owed between friends that gets partially forgotten or never settled.</div>
+    </div>
+    <div class="market-row">
+      <div class="market-fig">15B+</div>
+      <div class="market-desc"><strong>UPI transactions/month in India</strong> — we earn 0.1% of facilitated transactions as revenue when we launch the payment layer.</div>
+    </div>
+    <div class="market-row">
+      <div class="market-fig">₹0</div>
+      <div class="market-desc"><strong>CAC for the first 10,000 users</strong> — word of mouth inside WhatsApp groups is the product's own growth engine.</div>
+    </div>
+  </div>
+</div>
+
+<!-- GROWTH PLAYBOOK -->
+<section class="growth-section">
+  <p class="section-label fade-up">The playbook</p>
+  <h2 class="section-title fade-up">How we go from 0 to 100K groups in 6 months</h2>
+  <div class="growth-grid">
+    <div class="growth-card fade-up">
+      <span class="growth-tag tag-validate">Week 1 — Validate</span>
+      <h3>Does anyone actually want this?</h3>
+      <ul>
+        <li>Post in 5 Bangalore FB/Reddit groups: "Would you use this?"</li>
+        <li>Manual WhatsApp bot (you do the math, reply manually)</li>
+        <li>Goal: 50 real users, track if they come back</li>
+        <li>Talk to 20 users, record what they say out loud</li>
+      </ul>
+    </div>
+    <div class="growth-card fade-up">
+      <span class="growth-tag tag-build">Week 2–4 — Build MVP</span>
+      <h3>Make it work, not perfect</h3>
+      <ul>
+        <li>WhatsApp Business API bot (Twilio / WATI)</li>
+        <li>Parse "₹X [name] paid [reason]" command</li>
+        <li>Auto-generate UPI deeplinks for each member</li>
+        <li>Basic group ledger with running balances</li>
+      </ul>
+    </div>
+    <div class="growth-card fade-up">
+      <span class="growth-tag tag-grow">Month 2–3 — Grow</span>
+      <h3>Let the product spread itself</h3>
+      <ul>
+        <li>Every bill message = "Powered by SplitPe" watermark</li>
+        <li>Referral: invite a new group, get 1 month Pro free</li>
+        <li>Target PGs, hostels, engineering colleges directly</li>
+        <li>Partner with Zomato/Swiggy group-order flows</li>
+      </ul>
+    </div>
+    <div class="growth-card fade-up">
+      <span class="growth-tag tag-monetize">Month 4+ — Monetize</span>
+      <h3>Revenue that users don't resent</h3>
+      <ul>
+        <li>Free tier: unlimited splits, basic reminders</li>
+        <li>Pro ₹49/mo: recurring expense tracking, analytics</li>
+        <li>0.1% cut on UPI transactions we facilitate</li>
+        <li>B2B: offices, co-living spaces, travel groups</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<div class="final-cta">
+  <h2>Be the group that<br>never fights about money.</h2>
+  <p>Join the waitlist. We're launching in Bangalore first. First 200 groups get Pro free for life.</p>
+  <button class="btn-white" onclick="alert('Waitlist recorded! 🎉 We\'ll message you on WhatsApp when we launch.')">
+    Join the Waitlist — Free
+  </button>
+</div>
+
+<footer>
+  <div class="logo" style="font-size:1.1rem">Split<span style="color:var(--accent)">Pe</span></div>
+  <div>Built in Bangalore. By people who hate awkward money conversations.</div>
+  <div>© 2025</div>
+</footer>
+
+<script>
+  // Intersection Observer for fade-up animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
